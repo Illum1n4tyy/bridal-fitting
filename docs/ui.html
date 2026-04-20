@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bridal Fitting App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111; font-family: system-ui, sans-serif; color: #fff; display: flex; height: 100vh; overflow: hidden; }
+
+    .panel { width: 280px; background: #1a1a1a; border-right: 1px solid #2a2a2a; padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; flex-shrink: 0; }
+
+    .logo { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; color: #fff; }
+    .logo span { color: #a78bfa; }
+
+    .section-title { font-size: 10px; font-weight: 500; color: #555; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 10px; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field-header { display: flex; justify-content: space-between; align-items: center; }
+    .field-label { font-size: 13px; color: #aaa; }
+    .field-value { font-size: 13px; font-weight: 500; color: #fff; }
+    input[type=range] { width: 100%; accent-color: #a78bfa; height: 3px; cursor: pointer; }
+    .field-limits { display: flex; justify-content: space-between; font-size: 10px; color: #444; margin-top: 2px; }
+
+    .talla-badge { background: #2a2a2a; border: 1px solid #333; border-radius: 8px; padding: 12px; text-align: center; }
+    .talla-num { font-size: 28px; font-weight: 700; color: #a78bfa; }
+    .talla-label { font-size: 11px; color: #555; margin-top: 2px; }
+
+    .apply-btn { width: 100%; padding: 12px; background: #a78bfa; color: #000; font-weight: 600; font-size: 14px; border: none; border-radius: 8px; cursor: pointer; margin-top: auto; }
+    .apply-btn:hover { background: #c4b5fd; }
+
+    .canvas-wrap { flex: 1; position: relative; }
+    iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    .hint { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.6); border: 1px solid #333; border-radius: 999px; padding: 6px 14px; font-size: 11px; color: #666; white-space: nowrap; }
+  </style>
+</head>
+<body>
+
+<div class="panel">
+  <div class="logo">bridal <span>fitting</span></div>
+
+  <div>
+    <div class="section-title">Medidas</div>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Altura</span>
+        <span class="field-value" id="val-altura">165 cm</span>
+      </div>
+      <input type="range" id="sl-altura" min="145" max="185" value="165" oninput="update()">
+      <div class="field-limits"><span>145</span><span>185 cm</span></div>
+    </div>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Busto</span>
+        <span class="field-value" id="val-busto">88 cm</span>
+      </div>
+      <input type="range" id="sl-busto" min="70" max="120" value="88" oninput="update()">
+      <div class="field-limits"><span>70</span><span>120 cm</span></div>
+    </div>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Cintura</span>
+        <span class="field-value" id="val-cintura">70 cm</span>
+      </div>
+      <input type="range" id="sl-cintura" min="55" max="105" value="70" oninput="update()">
+      <div class="field-limits"><span>55</span><span>105 cm</span></div>
+    </div>
+
+    <div class="field">
+      <div class="field-header">
+        <span class="field-label">Caderas</span>
+        <span class="field-value" id="val-caderas">96 cm</span>
+      </div>
+      <input type="range" id="sl-caderas" min="75" max="130" value="96" oninput="update()">
+      <div class="field-limits"><span>75</span><span>130 cm</span></div>
+    </div>
+  </div>
+
+  <div class="talla-badge">
+    <div class="talla-num" id="talla">M</div>
+    <div class="talla-label">talla aproximada</div>
+  </div>
+
+  <button class="apply-btn" onclick="apply()">Aplicar al maniquí</button>
+</div>
+
+<div class="canvas-wrap">
+  <iframe id="godot" src="index.html" allow="cross-origin-isolated"></iframe>
+  <div class="hint">Arrastra para rotar · Scroll para zoom</div>
+</div>
+
+<script>
+  function update() {
+    const altura  = +document.getElementById('sl-altura').value;
+    const busto   = +document.getElementById('sl-busto').value;
+    const cintura = +document.getElementById('sl-cintura').value;
+    const caderas = +document.getElementById('sl-caderas').value;
+
+    document.getElementById('val-altura').textContent  = altura  + ' cm';
+    document.getElementById('val-busto').textContent   = busto   + ' cm';
+    document.getElementById('val-cintura').textContent = cintura + ' cm';
+    document.getElementById('val-caderas').textContent = caderas + ' cm';
+
+    const t = busto <= 80 ? 'XS' : busto <= 84 ? 'S' : busto <= 88 ? 'M' : busto <= 92 ? 'L' : busto <= 100 ? 'XL' : 'XXL';
+    document.getElementById('talla').textContent = t;
+  }
+
+  function apply() {
+    const iframe = document.getElementById('godot');
+    const data = {
+      busto:   +document.getElementById('sl-busto').value,
+      cintura: +document.getElementById('sl-cintura').value,
+      caderas: +document.getElementById('sl-caderas').value,
+      altura:  +document.getElementById('sl-altura').value,
+    };
+    iframe.contentWindow.postMessage({ type: 'measurements', data }, '*');
+  }
+</script>
+</body>
+</html>

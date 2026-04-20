@@ -17,6 +17,40 @@ func _ready():
 	camera.position = Vector3(0, 1.0, camera_distance)
 	update_mannequin(88.0, 70.0, 96.0, 165.0)
 
+	if OS.get_name() == "Web":
+		JavaScriptBridge.create_callback(_on_js_message)
+		JavaScriptBridge.eval("""
+			window.addEventListener('message', function(e) {
+				if (e.data && e.data.type === 'measurements') {
+					GodotRuntime.callMain([JSON.stringify(e.data.data)]);
+				}
+			});
+		""")
+func _set_relaxed_pose():
+	# Baja los brazos rotando los biceps
+	var bl = skeleton.find_bone("bicep.l")
+	var br = skeleton.find_bone("bicep.r")
+	
+	if bl != -1:
+		var rot_l = Quaternion(Vector3(0, 0, 1), deg_to_rad(50))
+		skeleton.set_bone_pose_rotation(bl, rot_l)
+	
+	if br != -1:
+		var rot_r = Quaternion(Vector3(0, 0, 1), deg_to_rad(-50))
+		skeleton.set_bone_pose_rotation(br, rot_r)
+		
+func _on_js_message(args):
+	var json = JSON.new()
+	var result = json.parse(args[0])
+	if result == OK:
+		var data = json.get_data()
+		update_mannequin(
+			float(data["busto"]),
+			float(data["cintura"]),
+			float(data["caderas"]),
+			float(data["altura"])
+		)
+
 func update_mannequin(busto: float, cintura: float, caderas: float, altura: float):
 	if not skeleton:
 		print("ERROR: skeleton no encontrado")
@@ -42,10 +76,10 @@ func update_mannequin(busto: float, cintura: float, caderas: float, altura: floa
 	# Altura general - escala el hueso base
 	_scale_bone("Base", Vector3(1.0, altura_s, 1.0))
 
-func _scale_bone(bone_name: String, scale: Vector3):
+func _scale_bone(bone_name: String, bone_scale: Vector3):
 	var idx = skeleton.find_bone(bone_name)
 	if idx != -1:
-		skeleton.set_bone_pose_scale(idx, scale)
+		skeleton.set_bone_pose_scale(idx, bone_scale)
 	else:
 		print("Hueso no encontrado: ", bone_name)
 

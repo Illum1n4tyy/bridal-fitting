@@ -3,252 +3,399 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-	<title>App de Shaiel</title>
+	<title>AppBodaS — Prueba tu vestido ideal</title>
 	<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Inter:wght@300;400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+	--lila: #C9B8E8;
+	--lila-dark: #9B84CC;
+	--rosa: #F2C4CE;
+	--rosa-dark: #D9899A;
+	--crema: #FAF6F0;
+	--panel-bg: rgba(250, 246, 248, 0.97);
+	--border: rgba(201, 184, 232, 0.3);
+	--text: #3D2E4A;
+	--text-muted: #9B8FA8;
+	--white: #FFFFFF;
+}
+
 html, body {
-	margin: 0;
-	padding: 0;
-	border: 0;
-	width: 100%;
-	height: 100%;
+	margin: 0; padding: 0; border: 0;
+	width: 100%; height: 100%;
 	overflow: hidden;
-	background: #111;
+	background: #1a1020;
 	touch-action: none;
-	color: white;
 }
 
 #canvas {
 	display: block;
 	position: absolute;
 	top: 0;
-	left: 260px;
-	width: calc(100% - 260px);
+	left: 280px;
+	width: calc(100% - 280px);
 	height: 100%;
 	border: 0;
-	padding: 0;
-	margin: 0;
 }
-
 #canvas:focus { outline: none; }
 
 #status, #status-splash, #status-progress {
 	position: absolute;
-	left: 260px;
+	left: 280px;
 	right: 0;
 }
-
-#status, #status-splash {
-	top: 0;
-	bottom: 0;
-}
-
+#status, #status-splash { top: 0; bottom: 0; }
 #status {
-	background-color: #111;
+	background: linear-gradient(135deg, #1a1020 0%, #2d1535 50%, #1a1020 100%);
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	visibility: hidden;
+	gap: 24px;
 }
-
-#status-splash {
-	max-height: 100%;
-	max-width: 100%;
-	margin: auto;
-	display: none;
-}
-
-#status-progress, #status-notice {
-	display: none;
-}
-
+#status-splash { display: none; }
+#status-progress, #status-notice { display: none; }
 #status-progress {
-	bottom: 10%;
-	width: 50%;
-	margin: 0 auto;
+	bottom: 10%; width: 50%; margin: 0 auto;
 }
-
 #status-notice {
 	background-color: #5b3943;
 	border-radius: 0.5rem;
 	border: 1px solid #9b3943;
 	color: #e0e0e0;
-	font-family: Arial, sans-serif;
-	line-height: 1.3;
-	margin: 0 2rem;
-	overflow: hidden;
+	font-family: 'Inter', sans-serif;
 	padding: 1rem;
 	text-align: center;
 	z-index: 1;
 }
 
+/* Loading screen custom */
+#loading-screen {
+	position: fixed;
+	inset: 0;
+	background: linear-gradient(135deg, #1C0F2E 0%, #2D1040 40%, #1a0828 100%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 99999;
+	gap: 32px;
+	transition: opacity 0.8s ease;
+}
+#loading-screen.fade-out { opacity: 0; pointer-events: none; }
+
+.loading-petals {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+.particle {
+	position: absolute;
+	animation: fall linear infinite;
+	opacity: 0;
+}
+@keyframes fall {
+	0%   { transform: translateY(-30px) rotate(0deg) scale(1);   opacity: 0; }
+	8%   { opacity: 1; }
+	85%  { opacity: 0.7; }
+	100% { transform: translateY(105vh) rotate(420deg) scale(0.8); opacity: 0; }
+}
+@keyframes sway {
+	0%,100% { margin-left: 0; }
+	25%     { margin-left: 12px; }
+	75%     { margin-left: -12px; }
+}
+.particle { animation: fall linear infinite, sway ease-in-out infinite; }
+
+.loading-logo {
+	font-family: 'Cormorant Garamond', serif;
+	font-size: 42px;
+	font-weight: 300;
+	color: var(--crema);
+	letter-spacing: 4px;
+	text-align: center;
+}
+.loading-logo span { color: var(--lila); font-style: italic; }
+.loading-tagline {
+	font-family: 'Inter', sans-serif;
+	font-size: 12px;
+	color: rgba(201, 184, 232, 0.6);
+	letter-spacing: 3px;
+	text-transform: uppercase;
+}
+
+.loading-ring {
+	width: 60px;
+	height: 60px;
+	border: 1px solid rgba(201, 184, 232, 0.2);
+	border-top: 1px solid var(--lila);
+	border-radius: 50%;
+	animation: spin 1.5s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-bar-wrap {
+	width: 200px;
+	height: 2px;
+	background: rgba(255,255,255,0.08);
+	border-radius: 999px;
+	overflow: hidden;
+}
+.loading-bar {
+	height: 100%;
+	width: 0%;
+	background: linear-gradient(90deg, var(--lila), var(--rosa));
+	border-radius: 999px;
+	transition: width 0.3s ease;
+}
+
+/* Decorative rings */
+.deco-ring {
+	position: absolute;
+	border: 1px solid rgba(201, 184, 232, 0.08);
+	border-radius: 50%;
+	pointer-events: none;
+}
+
 /* UI Panel */
 #ui-panel {
 	position: fixed;
-	top: 0;
-	left: 0;
-	width: 260px;
+	top: 0; left: 0;
+	width: 280px;
 	height: 100vh;
-	background: #1a1a1a;
-	border-right: 1px solid #2a2a2a;
-	padding: 24px 20px;
+	background: var(--panel-bg);
+	border-right: 1px solid var(--border);
 	display: flex;
 	flex-direction: column;
-	gap: 16px;
 	z-index: 9999;
 	overflow-y: auto;
-	font-family: system-ui, sans-serif;
-	color: #fff;
-	box-sizing: border-box;
+	font-family: 'Inter', sans-serif;
+	color: var(--text);
+	backdrop-filter: blur(20px);
 }
 
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field-header { display: flex; justify-content: space-between; align-items: center; }
-.field-label { font-size: 13px; color: #aaa; }
-.field-value { font-size: 13px; font-weight: 500; color: #fff; }
-input[type=range] { width: 100%; accent-color: #a78bfa; cursor: pointer; }
-
-.talla-badge {
-	background: #2a2a2a;
-	border-radius: 8px;
-	padding: 12px;
-	text-align: center;
+.panel-header {
+	padding: 28px 24px 20px;
+	border-bottom: 1px solid var(--border);
+	background: linear-gradient(180deg, rgba(201,184,232,0.08) 0%, transparent 100%);
 }
-.talla-num { font-size: 28px; font-weight: 700; color: #a78bfa; }
-.talla-sub { font-size: 11px; color: #555; margin-top: 2px; }
+.panel-logo {
+	font-family: 'Cormorant Garamond', serif;
+	font-size: 22px;
+	font-weight: 300;
+	color: var(--text);
+	letter-spacing: 1px;
+}
+.panel-logo span { color: var(--lila-dark); font-style: italic; }
+.panel-tagline {
+	font-size: 10px;
+	color: var(--text-muted);
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	margin-top: 4px;
+}
+
+.panel-body { padding: 20px 24px; display: flex; flex-direction: column; gap: 20px; flex: 1; }
+
+.section-label {
+	font-size: 10px;
+	font-weight: 500;
+	color: var(--text-muted);
+	text-transform: uppercase;
+	letter-spacing: .1em;
+	margin-bottom: 12px;
+}
+
+.field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.field-header { display: flex; justify-content: space-between; align-items: baseline; }
+.field-label { font-size: 13px; color: var(--text); font-weight: 300; }
+.field-value { font-size: 12px; font-weight: 500; color: var(--lila-dark); }
+
+input[type=range] {
+	width: 100%;
+	height: 2px;
+	-webkit-appearance: none;
+	appearance: none;
+	background: linear-gradient(90deg, var(--lila) var(--pct, 40%), rgba(201,184,232,0.2) var(--pct, 40%));
+	border-radius: 999px;
+	cursor: pointer;
+	outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 14px; height: 14px;
+	border-radius: 50%;
+	background: white;
+	border: 2px solid var(--lila-dark);
+	box-shadow: 0 1px 4px rgba(155,132,204,0.3);
+	cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+	width: 14px; height: 14px;
+	border-radius: 50%;
+	background: white;
+	border: 2px solid var(--lila-dark);
+	cursor: pointer;
+}
+
+.talla-card {
+	background: linear-gradient(135deg, rgba(201,184,232,0.12) 0%, rgba(242,196,206,0.08) 100%);
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	padding: 14px 16px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+.talla-left { display: flex; flex-direction: column; gap: 2px; }
+.talla-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; }
+.talla-num { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--lila-dark); line-height: 1; }
+.talla-desc { font-size: 10px; color: var(--text-muted); }
+
+
 
 .apply-btn {
 	width: 100%;
-	padding: 12px;
-	background: #a78bfa;
-	color: #000;
-	font-weight: 600;
-	font-size: 14px;
+	padding: 13px;
+	background: linear-gradient(135deg, var(--lila-dark) 0%, #B8A0D8 100%);
+	color: white;
+	font-weight: 400;
+	font-size: 13px;
+	letter-spacing: 1.5px;
+	text-transform: uppercase;
 	border: none;
-	border-radius: 8px;
+	border-radius: 10px;
 	cursor: pointer;
-	margin-top: auto;
+	font-family: 'Inter', sans-serif;
+	transition: all 0.2s;
+	box-shadow: 0 4px 15px rgba(155,132,204,0.3);
 }
-.apply-btn:hover { background: #c4b5fd; }
+.apply-btn:hover {
+	background: linear-gradient(135deg, #8A70C0 0%, var(--lila-dark) 100%);
+	box-shadow: 0 6px 20px rgba(155,132,204,0.4);
+	transform: translateY(-1px);
+}
+
+.panel-footer {
+	padding: 16px 24px;
+	border-top: 1px solid var(--border);
+	font-size: 10px;
+	color: var(--text-muted);
+	text-align: center;
+	letter-spacing: 1px;
+}
 
 .hint {
 	position: fixed;
 	bottom: 16px;
 	left: 50%;
-	transform: translateX(calc(-50% + 130px));
-	background: rgba(0,0,0,0.6);
-	border: 1px solid #333;
+	transform: translateX(calc(-50% + 140px));
+	background: rgba(28,15,46,0.7);
+	border: 1px solid rgba(201,184,232,0.15);
 	border-radius: 999px;
-	padding: 6px 14px;
+	padding: 6px 16px;
 	font-size: 11px;
-	color: #666;
+	color: rgba(201,184,232,0.5);
 	white-space: nowrap;
 	z-index: 9998;
+	font-family: 'Inter', sans-serif;
+	letter-spacing: 0.5px;
 }
+
 @media (max-width: 768px) {
 	#ui-panel {
-		width: 100%;
-		height: auto;
-		max-height: 45vh;
-		bottom: 0;
-		top: auto;
+		width: 100%; height: auto;
+		max-height: 48vh;
+		bottom: 0; top: auto;
 		border-right: none;
-		border-top: 1px solid #2a2a2a;
-		flex-direction: row;
-		flex-wrap: wrap;
-		gap: 10px;
-		padding: 16px;
+		border-top: 1px solid var(--border);
 	}
-
-	#canvas {
-		left: 0;
-		width: 100%;
-		height: 55vh;
-	}
-
-	#status, #status-splash, #status-progress {
-		left: 0;
-		top: 0;
-		height: 55vh;
-	}
-
-	.talla-badge {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 12px;
-	}
-
-	.talla-num { font-size: 20px; }
-
-	.apply-btn {
-		margin-top: 0;
-		padding: 8px 12px;
-		font-size: 13px;
-		width: auto;
-	}
-
+	#canvas { left: 0; width: 100%; height: 52vh; }
+	#status, #status-progress { left: 0; height: 52vh; }
+	.apply-btn { padding: 10px; font-size: 12px; }
 	.hint { display: none; }
+	#loading-screen { left: 0; }
 }
-
 	</style>
-	<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 </head>
 <body>
 
+<!-- Loading Screen -->
+<div id="loading-screen">
+	<div class="loading-petals" id="petals"></div>
+	<div class="deco-ring" style="width:400px;height:400px;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+	<div class="deco-ring" style="width:600px;height:600px;top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+	<div class="loading-logo">App<span>BodaS</span></div>
+	<div class="loading-tagline">Encuentra tu vestido ideal</div>
+	<div class="loading-ring"></div>
+	<div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+</div>
+
 <!-- UI Panel -->
 <div id="ui-panel">
-	<div style="font-size:15px;font-weight:600">App de <span style="color:#a78bfa">Shaiel</span></div>
-	<div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.08em">Ingrese sus Medidas</div>
-
-	<div style="display:flex;flex-direction:column;gap:14px">
-		<div class="field">
-			<div class="field-header">
-				<span class="field-label">Altura</span>
-				<span class="field-value" id="val-altura">165 cm</span>
-			</div>
-			<input type="range" id="sl-altura" min="145" max="185" value="165" oninput="updateUI()">
-			<div style="display:flex;justify-content:space-between;font-size:10px;color:#444"><span>145</span><span>185 cm</span></div>
-		</div>
-		<div class="field">
-			<div class="field-header">
-				<span class="field-label">Busto</span>
-				<span class="field-value" id="val-busto">88 cm</span>
-			</div>
-			<input type="range" id="sl-busto" min="70" max="120" value="88" oninput="updateUI()">
-			<div style="display:flex;justify-content:space-between;font-size:10px;color:#444"><span>70</span><span>120 cm</span></div>
-		</div>
-		<div class="field">
-			<div class="field-header">
-				<span class="field-label">Cintura</span>
-				<span class="field-value" id="val-cintura">70 cm</span>
-			</div>
-			<input type="range" id="sl-cintura" min="55" max="105" value="70" oninput="updateUI()">
-			<div style="display:flex;justify-content:space-between;font-size:10px;color:#444"><span>55</span><span>105 cm</span></div>
-		</div>
-		<div class="field">
-			<div class="field-header">
-				<span class="field-label">Caderas</span>
-				<span class="field-value" id="val-caderas">96 cm</span>
-			</div>
-			<input type="range" id="sl-caderas" min="75" max="130" value="96" oninput="updateUI()">
-			<div style="display:flex;justify-content:space-between;font-size:10px;color:#444"><span>75</span><span>130 cm</span></div>
-		</div>
+	<div class="panel-header">
+		<div class="panel-logo">App<span>BodaS</span></div>
+		<div class="panel-tagline">Prueba virtual de vestidos</div>
 	</div>
 
-	<div class="talla-badge">
-		<div class="talla-num" id="talla">M</div>
-		<div class="talla-sub">Talla aproximada</div>
+	<div class="panel-body">
+		<div>
+			<div class="section-label">Tus medidas</div>
+			<div class="field">
+				<div class="field-header">
+					<span class="field-label">Altura</span>
+					<span class="field-value" id="val-altura">165 cm</span>
+				</div>
+				<input type="range" id="sl-altura" min="145" max="185" value="165" oninput="updateUI(this,'altura',145,185)">
+			</div>
+			<div class="field">
+				<div class="field-header">
+					<span class="field-label">Busto</span>
+					<span class="field-value" id="val-busto">88 cm</span>
+				</div>
+				<input type="range" id="sl-busto" min="70" max="120" value="88" oninput="updateUI(this,'busto',70,120)">
+			</div>
+			<div class="field">
+				<div class="field-header">
+					<span class="field-label">Cintura</span>
+					<span class="field-value" id="val-cintura">70 cm</span>
+				</div>
+				<input type="range" id="sl-cintura" min="55" max="105" value="70" oninput="updateUI(this,'cintura',55,105)">
+			</div>
+			<div class="field">
+				<div class="field-header">
+					<span class="field-label">Caderas</span>
+					<span class="field-value" id="val-caderas">96 cm</span>
+				</div>
+				<input type="range" id="sl-caderas" min="75" max="130" value="96" oninput="updateUI(this,'caderas',75,130)">
+			</div>
+		</div>
+
+		<div class="talla-card">
+			<div class="talla-left">
+				<span class="talla-label">Talla aproximada</span>
+				<span class="talla-num" id="talla">M</span>
+				<span class="talla-desc" id="talla-desc">Talla estándar europea</span>
+			</div>
+			<svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+				<path d="M16 4 L20 12 L28 13 L22 19 L24 28 L16 24 L8 28 L10 19 L4 13 L12 12 Z" fill="none" stroke="#C9B8E8" stroke-width="1"/>
+			</svg>
+		</div>
+
+
+
+		<button class="apply-btn" onclick="applyMeasurements()">Aplicar al maniquí</button>
 	</div>
 
-	<button class="apply-btn" onclick="applyMeasurements()">Aplicar al maniquí</button>
+	<div class="panel-footer">AppBodaS · Prueba virtual</div>
 </div>
 
 <!-- Godot Canvas -->
-<canvas id="canvas">
-	Your browser does not support the canvas tag.
-</canvas>
-
+<canvas id="canvas">Your browser does not support the canvas tag.</canvas>
 <noscript>Your browser does not support JavaScript.</noscript>
 
 <div id="status">
@@ -258,16 +405,60 @@ input[type=range] { width: 100%; accent-color: #a78bfa; cursor: pointer; }
 
 <div class="hint">Arrastra para rotar · Scroll para zoom</div>
 
+<!-- Ambient music (royalty free piano) -->
+<audio id="ambient" loop>
+	<source src="music.mp3" type="audio/mpeg">
+</audio>
+
 <script src="index.js"></script>
 <script>
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":8284044,"index.wasm":36145869},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
+// Particles: tulip petals, rose petals, hearts
+(function() {
+	const container = document.getElementById('petals');
+
+	// SVG shapes
+	const shapes = [
+		// Rose petal
+		{ type:'svg', color:'rgba(242,196,206,0.55)', w:10, h:14,
+		  svg:`<svg viewBox="0 0 10 14" xmlns="http://www.w3.org/2000/svg"><ellipse cx="5" cy="7" rx="4" ry="6.5" fill="rgba(242,196,206,0.7)" transform="rotate(-20,5,7)"/></svg>` },
+		// Tulip petal
+		{ type:'svg', color:'rgba(201,184,232,0.6)', w:10, h:16,
+		  svg:`<svg viewBox="0 0 10 16" xmlns="http://www.w3.org/2000/svg"><path d="M5 1 C2 4 1 8 2 12 C3 14 7 14 8 12 C9 8 8 4 5 1Z" fill="rgba(201,184,232,0.75)"/></svg>` },
+		// Heart
+		{ type:'svg', color:'rgba(217,137,154,0.5)', w:12, h:11,
+		  svg:`<svg viewBox="0 0 12 11" xmlns="http://www.w3.org/2000/svg"><path d="M6 10 C6 10 1 6.5 1 3.5 C1 1.5 2.5 0.5 4 0.5 C5 0.5 5.8 1 6 1.5 C6.2 1 7 0.5 8 0.5 C9.5 0.5 11 1.5 11 3.5 C11 6.5 6 10 6 10Z" fill="rgba(217,137,154,0.65)"/></svg>` },
+		// Small round petal
+		{ type:'svg', color:'rgba(250,220,230,0.5)', w:8, h:8,
+		  svg:`<svg viewBox="0 0 8 8" xmlns="http://www.w3.org/2000/svg"><ellipse cx="4" cy="4" rx="3.5" ry="3.5" fill="rgba(250,220,230,0.6)"/></svg>` },
+	];
+
+	for (let i = 0; i < 35; i++) {
+		const shape = shapes[Math.floor(Math.random() * shapes.length)];
+		const p = document.createElement('div');
+		p.className = 'particle';
+		p.style.left = (Math.random() * 105 - 2) + '%';
+		const dur = 5 + Math.random() * 7;
+		const swayDur = 2 + Math.random() * 3;
+		p.style.animationDuration = `${dur}s, ${swayDur}s`;
+		p.style.animationDelay = `${Math.random() * 8}s, ${Math.random() * 2}s`;
+		p.style.width = shape.w + 'px';
+		p.style.height = shape.h + 'px';
+		p.innerHTML = shape.svg;
+		container.appendChild(p);
+	}
+})();
+
+// Godot engine init
 (function () {
 	const statusOverlay = document.getElementById('status');
 	const statusProgress = document.getElementById('status-progress');
 	const statusNotice = document.getElementById('status-notice');
+	const loadingBar = document.getElementById('loading-bar');
+	const loadingScreen = document.getElementById('loading-screen');
 	let initializing = true;
 	let statusMode = '';
 
@@ -276,6 +467,8 @@ const engine = new Engine(GODOT_CONFIG);
 		if (mode === 'hidden') {
 			statusOverlay.remove();
 			initializing = false;
+			loadingScreen.classList.add('fade-out');
+			setTimeout(() => loadingScreen.remove(), 900);
 			return;
 		}
 		statusOverlay.style.visibility = 'visible';
@@ -302,7 +495,6 @@ const engine = new Engine(GODOT_CONFIG);
 	}
 
 	const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
-
 	if (missing.length !== 0) {
 		displayFailureNotice('Error\nMissing features:\n' + missing.join('\n'));
 	} else {
@@ -310,6 +502,8 @@ const engine = new Engine(GODOT_CONFIG);
 		engine.startGame({
 			'onProgress': function (current, total) {
 				if (current > 0 && total > 0) {
+					const pct = (current / total * 100).toFixed(0);
+					if (loadingBar) loadingBar.style.width = pct + '%';
 					statusProgress.value = current;
 					statusProgress.max = total;
 				} else {
@@ -321,17 +515,28 @@ const engine = new Engine(GODOT_CONFIG);
 	}
 }());
 
-// UI Functions
-function updateUI() {
-	const b  = +document.getElementById('sl-busto').value;
-	const c  = +document.getElementById('sl-cintura').value;
-	const ca = +document.getElementById('sl-caderas').value;
-	const a  = +document.getElementById('sl-altura').value;
-	document.getElementById('val-busto').textContent   = b  + ' cm';
-	document.getElementById('val-cintura').textContent = c  + ' cm';
-	document.getElementById('val-caderas').textContent = ca + ' cm';
-	document.getElementById('val-altura').textContent  = a  + ' cm';
-	document.getElementById('talla').textContent = b<=80?'XS':b<=84?'S':b<=88?'M':b<=92?'L':b<=100?'XL':'XXL';
+// UI
+function updateUI(el, field, min, max) {
+	const val = +el.value;
+	const pct = ((val - min) / (max - min) * 100).toFixed(1);
+	el.style.setProperty('--pct', pct + '%');
+	document.getElementById('val-' + field).textContent = val + ' cm';
+	updateTalla();
+}
+
+function updateTalla() {
+	const b = +document.getElementById('sl-busto').value;
+	const tallas = [
+		[80,'XS','Extra pequeña'],
+		[84,'S','Pequeña'],
+		[88,'M','Mediana'],
+		[92,'L','Grande'],
+		[100,'XL','Extra grande'],
+		[Infinity,'XXL','Doble extra grande']
+	];
+	const t = tallas.find(([max]) => b <= max);
+	document.getElementById('talla').textContent = t[1];
+	document.getElementById('talla-desc').textContent = t[2];
 }
 
 function applyMeasurements() {
@@ -345,6 +550,28 @@ function applyMeasurements() {
 		console.warn('Godot not ready yet:', e);
 	}
 }
+
+// Music - auto play on first interaction
+const audio = document.getElementById('ambient');
+audio.volume = 0.2;
+let musicStarted = false;
+function tryPlayMusic() {
+	if (!musicStarted) {
+		audio.play().then(() => { musicStarted = true; }).catch(() => {});
+	}
+}
+document.addEventListener('click', tryPlayMusic, { once: false });
+document.addEventListener('touchstart', tryPlayMusic, { once: false });
+window.addEventListener('load', () => setTimeout(tryPlayMusic, 1000));
+
+// Init slider gradients
+window.addEventListener('load', () => {
+	document.querySelectorAll('input[type=range]').forEach(el => {
+		const min = +el.min, max = +el.max, val = +el.value;
+		const pct = ((val - min) / (max - min) * 100).toFixed(1);
+		el.style.setProperty('--pct', pct + '%');
+	});
+});
 </script>
 </body>
 </html>

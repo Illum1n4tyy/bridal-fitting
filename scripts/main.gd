@@ -8,24 +8,31 @@ const BASE_CINTURA = 70.0
 const BASE_CADERAS = 96.0
 const BASE_ALTURA = 165.0
 
+var camera_height := 1.0
 var camera_angle := 0.0
 var camera_distance := 3.0
 var is_dragging := false
 var last_mouse_x := 0.0
 
+func is_mobile():
+	return DisplayServer.window_get_size().x < 768
+
+func _adjust_camera_mode():
+	if is_mobile():
+		camera_distance = 4.2   # más lejos
+		camera_height = 1.2     # un poco más alto
+		camera.fov = 75         # más abierto
+	else:
+		camera_distance = 3.0
+		camera_height = 1.0
+		camera.fov = 60
+
 func _ready():
-	camera.position = Vector3(0, 1.0, camera_distance)
+	_adjust_camera_mode()
+
+	camera.position = Vector3(0, camera_height, camera_distance)
 	update_mannequin(88.0, 70.0, 96.0, 165.0)
 
-	if OS.get_name() == "Web":
-		JavaScriptBridge.create_callback(_on_js_message)
-		JavaScriptBridge.eval("""
-			window.addEventListener('message', function(e) {
-				if (e.data && e.data.type === 'measurements') {
-					GodotRuntime.callMain([JSON.stringify(e.data.data)]);
-				}
-			});
-		""")
 func _set_relaxed_pose():
 	# Baja los brazos rotando los biceps
 	var bl = skeleton.find_bone("bicep.l")
@@ -107,10 +114,13 @@ func _update_camera():
 	var rad = deg_to_rad(camera_angle)
 	camera.position = Vector3(
 		sin(rad) * camera_distance,
-		1.0,
+		camera_height,
 		cos(rad) * camera_distance
 	)
 	camera.look_at(Vector3(0, 1.0, 0))
+
+func _process(_delta):
+	_adjust_camera_mode()
 
 func _on_js_measurements(args):
 	var data = args[0]

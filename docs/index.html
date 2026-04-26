@@ -392,6 +392,19 @@ input[type=range]::-webkit-slider-thumb {
 
 <script src="index.js"></script>
 <script>
+
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+if (isMobile) {
+	console.log("Modo móvil activado");
+
+	// bajar resolución
+	GODOT_CONFIG.canvasResizePolicy = 1;
+
+	// bajar uso de memoria
+	GODOT_CONFIG.emscriptenPoolSize = 4;
+}
+
 const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":true,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":8284044,"index.wasm":36145869},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
@@ -479,20 +492,21 @@ function spawnParticles() {
 		setStatusNotice(err instanceof Error ? err.message : typeof err === 'string' ? err : 'Unknown error');
 		setStatusMode('notice'); initializing = false;
 	}
-	const missing = Engine.getMissingFeatures({ threads: GODOT_THREADS_ENABLED });
-	if (missing.length !== 0) {
-		displayFailureNotice('Error\nMissing features:\n' + missing.join('\n'));
-	} else {
-		setStatusMode('progress');
-		engine.startGame({
-			onProgress(current, total) {
-				if (current > 0 && total > 0) {
-					if (loadingBar) loadingBar.style.width = (current/total*100).toFixed(0) + '%';
-					statusProgress.value = current; statusProgress.max = total;
-				}
+	const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+engine.startGame({
+	powerPreference: isMobile ? "low-power" : "high-performance",
+
+	onProgress(current, total) {
+		if (current > 0 && total > 0) {
+			if (loadingBar) {
+				loadingBar.style.width = (current / total * 100).toFixed(0) + '%';
 			}
-		}).then(() => setStatusMode('hidden'), displayFailureNotice);
+			statusProgress.value = current;
+			statusProgress.max = total;
+		}
 	}
+}).then(() => setStatusMode('hidden'), displayFailureNotice);
 }());
 
 // UI

@@ -14,8 +14,26 @@ var camera_distance := 3.0
 var is_dragging := false
 var last_mouse_x := 0.0
 
+func apply_mobile_mode():
+	print("Modo móvil activado en Godot")
+
+	# cámara más lejos
+	camera_distance = 4.5
+	camera_height = 1.3
+	camera.fov = 75
+
+	# limitar FPS
+	Engine.max_fps = 30
+
+	# desactivar sombras (MUY IMPORTANTE)
+	var light = $DirectionalLight3D
+	if light:
+		light.shadow_enabled = false
+
 func is_mobile():
-	return DisplayServer.window_get_size().x < 768
+	return OS.get_name() == "Android" \
+		or OS.get_name() == "iOS" \
+		or DisplayServer.window_get_size().x < 768
 
 func _adjust_camera_mode():
 	if is_mobile():
@@ -28,11 +46,16 @@ func _adjust_camera_mode():
 		camera.fov = 60
 
 func _ready():
-	_adjust_camera_mode()
+	if is_mobile():
+		apply_mobile_mode()
+	else:
+		camera_distance = 3.0
+		camera_height = 1.0
+		camera.fov = 60
 
 	camera.position = Vector3(0, camera_height, camera_distance)
-	update_mannequin(88.0, 70.0, 96.0, 165.0)
 
+	update_mannequin(88.0, 70.0, 96.0, 165.0)
 func _set_relaxed_pose():
 	# Baja los brazos rotando los biceps
 	var bl = skeleton.find_bone("bicep.l")

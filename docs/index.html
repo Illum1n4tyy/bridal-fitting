@@ -95,6 +95,43 @@ body {
 
 	</head>
 	<body>
+    <div id="ui-panel" style="position:fixed;top:0;left:0;width:260px;height:100vh;background:#1a1a1a;border-right:1px solid #2a2a2a;padding:24px 20px;display:flex;flex-direction:column;gap:16px;z-index:9999;overflow-y:auto;font-family:system-ui,sans-serif;color:#fff">
+  <div style="font-size:15px;font-weight:600">bridal <span style="color:#a78bfa">fitting</span></div>
+  <div style="font-size:10px;color:#555;text-transform:uppercase;letter-spacing:.08em">Medidas</div>
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;color:#aaa">Altura</span>
+        <span style="font-size:13px;font-weight:500" id="val-altura">165 cm</span>
+      </div>
+      <input type="range" id="sl-altura" min="145" max="185" value="165" oninput="updateUI()" style="width:100%;accent-color:#a78bfa">
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;color:#aaa">Busto</span>
+        <span style="font-size:13px;font-weight:500" id="val-busto">88 cm</span>
+      </div>
+      <input type="range" id="sl-busto" min="70" max="120" value="88" oninput="updateUI()" style="width:100%;accent-color:#a78bfa">
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;color:#aaa">Cintura</span>
+        <span style="font-size:13px;font-weight:500" id="val-cintura">70 cm</span>
+      </div>
+      <input type="range" id="sl-cintura" min="55" max="105" value="70" oninput="updateUI()" style="width:100%;accent-color:#a78bfa">
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:13px;color:#aaa">Caderas</span>
+        <span style="font-size:13px;font-weight:500" id="val-caderas">96 cm</span>
+      </div>
+      <input type="range" id="sl-caderas" min="75" max="130" value="96" oninput="updateUI()" style="width:100%;accent-color:#a78bfa">
+    </div>
+  </div>
+
+  <div style="background:#2a2a2a;border-radius:8px;padding:12px;text-align:center">
+    <div styl
 		<canvas id="canvas">
 			Your browser does not support the canvas tag.
 		</canvas>
